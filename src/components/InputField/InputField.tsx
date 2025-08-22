@@ -14,23 +14,12 @@ export interface InputFieldProps {
   size?: "sm" | "md" | "lg";
   type?: string;
   name?: string;
-  // Optional features
   clearable?: boolean;
   showPasswordToggle?: boolean;
   loading?: boolean;
   className?: string;
 }
 
-/**
- * InputField
- *
- * - forwardRef for integration with form libraries
- * - accessible (label association, aria-invalid, aria-describedby)
- * - variants: filled, outlined, ghost
- * - sizes: sm, md, lg
- * - states: disabled, invalid, loading
- * - optional clear button & password toggle
- */
 const sizeStyles = {
   sm: "text-sm px-3 py-1.5 rounded-md",
   md: "text-base px-3.5 py-2 rounded-lg",
@@ -47,8 +36,8 @@ const variantBase = {
 } as const;
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-  (props, ref) => {
-    const {
+  (
+    {
       value,
       onChange,
       label,
@@ -66,8 +55,9 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       loading = false,
       className,
       ...rest
-    } = props;
-
+    },
+    ref
+  ) => {
     const id = useId();
     const describedByIds: string[] = [];
     if (helperText) describedByIds.push(`${id}-helper`);
@@ -78,7 +68,6 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     const showToggle = showPasswordToggle && type === "password";
 
     const onClear = () => {
-      // Create a synthetic change event to send empty value
       const event = {
         target: { value: "" },
       } as unknown as React.ChangeEvent<HTMLInputElement>;
@@ -98,7 +87,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     const inputBase = cn(
       "block w-full bg-transparent outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500",
       "disabled:cursor-not-allowed",
-      "pr-10" // space for buttons (clear/toggle/loading)
+      "pr-20" // extra padding so text never overlaps buttons
     );
 
     return (
@@ -125,7 +114,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             {...(rest as any)}
           />
 
-          {/* right-side controls */}
+          {/* Right-side controls */}
           <div className="absolute right-2 flex items-center gap-1">
             {loading && (
               <span
@@ -134,7 +123,6 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                 className="w-5 h-5 animate-spin inline-flex items-center justify-center"
                 title="loading"
               >
-                {/* simple spinner (SVG) */}
                 <svg
                   className="w-4 h-4"
                   viewBox="0 0 24 24"
@@ -159,29 +147,25 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
               </span>
             )}
 
-            {clearable &&
-              !disabled &&
-              value &&
-              value.length > 0 &&
-              !loading && (
-                <button
-                  type="button"
-                  aria-label="Clear input"
-                  onClick={onClear}
-                  className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
-                    <path
-                      d="M18 6L6 18M6 6l12 12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
-                  </svg>
-                </button>
-              )}
+            {clearable && !disabled && value && value.length > 0 && !loading && (
+              <button
+                type="button"
+                aria-label="Clear input"
+                onClick={onClear}
+                className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                </svg>
+              </button>
+            )}
 
             {showToggle && !loading && (
               <button
@@ -191,15 +175,14 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                     ? "Show password"
                     : "Hide password"
                 }
+                aria-pressed={internalType !== "password"}
                 onClick={() =>
-                  setInternalType((t) =>
-                    t === "password" ? "text" : "password"
-                  )
+                  setInternalType((t) => (t === "password" ? "text" : "password"))
                 }
                 className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
               >
                 {internalType === "password" ? (
-                  // eye icon
+                  // Eye icon
                   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
                     <path
                       d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"
@@ -217,19 +200,21 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                     />
                   </svg>
                 ) : (
-                  // eye-off icon
+                  // Eye-off icon
                   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
                     <path
-                      d="M17.94 17.94A10.94 10.94 0 0112 19c-6 0-10-7-10-7a18.6 18.6 0 014.36-5.48"
+                      d="M17.94 17.94A10.94 10.94 0 0112 19c-6 0-10-7-10-7a18.6 18.6 0 014.36-5.48M9.88 9.88A3 3 0 0012 15a3 3 0 002.12-5.12"
                       stroke="currentColor"
                       strokeWidth="1.5"
                       fill="none"
                     />
-                    <path
-                      d="M1 1l22 22"
+                    <line
+                      x1="1"
+                      y1="1"
+                      x2="23"
+                      y2="23"
                       stroke="currentColor"
                       strokeWidth="1.5"
-                      fill="none"
                     />
                   </svg>
                 )}
@@ -238,7 +223,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
           </div>
         </div>
 
-        {/* helper / error text */}
+        {/* Helper / error text */}
         <div className="mt-1 min-h-[1.25rem]">
           {invalid && errorMessage ? (
             <p id={`${id}-error`} className="text-sm text-red-600" role="alert">
@@ -252,8 +237,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
               {helperText}
             </p>
           ) : (
-            // preserve layout height when neither exists
-            <span className="block h-0"></span>
+            <span className="block h-0" />
           )}
         </div>
       </div>
